@@ -215,7 +215,8 @@ def checkForUpdates():
 def resultDisplay():
     today_date = GlobalVariable.final_result["today_date"]
     today_total_point = GlobalVariable.final_result["today_total_point"]
-    title = today_date + "到账积分:" + today_total_point
+    title = "#JDCloud\n"
+            + today_date + "到账积分:" + today_total_point
     if GlobalVariable.final_result.get("todayDate") is None:
         push("信息获取失败,无权限", "请检查wskey是否有效")
         return
@@ -279,9 +280,12 @@ def resultDisplay():
                 createTime = pointRecord["createTime"]
                 point_infos = point_infos + "\n        - " + \
                               createTime + "  " + recordType_str + str(pointAmount)
-    notifyContentJson = {"content": content, "date": todayDate, "total_today": today_total_point,
-                         "avail_today": total_avail_point, "account": bindAccount, "devicesCount": totalRecord,
-                         "detail": point_infos}
+    notifyContentJson = {
+                         "content": content, "date": todayDate, 
+                         "total_today": today_total_point, "avail_today": total_avail_point, 
+                         "account": bindAccount, "devicesCount": totalRecord,
+                         "detail": point_infos
+                        }
 
     push(title,notifyContentJson)
 
@@ -373,33 +377,25 @@ def main():
 
 # endregion
 
-def runTest(i):
-    if i > 10:
+def runTest():
+    if GlobalVariable.WSKEY is None or GlobalVariable.WSKEY.strip() == '':
+        print("未获取到环境变量'WSKEY'，执行中止")
         return
-    try:
-        if GlobalVariable.WSKEY is None or GlobalVariable.WSKEY.strip() == '':
-            print("未获取到环境变量'WSKEY'，执行中止")
-            return
-        GlobalVariable.headers["wskey"] = GlobalVariable.WSKEY
-        GlobalVariable.service_headers["tgt"] = GlobalVariable.WSKEY
-        if GlobalVariable.NETWORK_SEGMENT is None or GlobalVariable.NETWORK_SEGMENT.strip() == '':
-            main()
+    GlobalVariable.headers["wskey"] = GlobalVariable.WSKEY
+    GlobalVariable.service_headers["tgt"] = GlobalVariable.WSKEY
+    if GlobalVariable.NETWORK_SEGMENT is None or GlobalVariable.NETWORK_SEGMENT.strip() == '':
+        main()
+    else:
+        hourNow = datetime.datetime.now(pytz.timezone('PRC')).hour
+        if hourNow < 6:
+            print("当前时间小于6点,执行IP切换")
+            networkSegmentSwitch()
         else:
-            hourNow = datetime.datetime.now(pytz.timezone('PRC')).hour
-            if hourNow < 6:
-                print("当前时间小于6点,执行IP切换")
-                networkSegmentSwitch()
-            else:
-                print("当前时间大于6点,执行信息推送")
-                main()
-    except Exception as e:
-        print("出现错误：", e)
-        print("准备重新执行...")
-        time.sleep(3)
-        runTest(++i)
+            print("当前时间大于6点,执行信息推送")
+            main()
 
 
 # 读取配置文件
 if __name__ == '__main__':
-    runTest(0)
+    runTest()
 
