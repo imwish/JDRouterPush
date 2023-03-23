@@ -7,7 +7,9 @@ def normalTemplate():
 绑定账户:{account}
 设备总数:{devicesCount}
 **设备信息如下:**
-{detail}"""
+{detail}
+
+#JDCloud"""
     return content
 
 # Html模板
@@ -41,5 +43,7 @@ def markdownTemplate():
 **设备信息如下:**
 - ***
 {detail}
-- ***"""
+- ***
+
+#JDCloud"""
     return content
